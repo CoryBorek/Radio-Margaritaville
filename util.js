@@ -67,7 +67,7 @@ var utilities = {
 	},
 	hasPerms: function(restriction, message) {
 		let hasPerms = false
-		if (restriction >= 2 && (message.author.id === '162369340069511180') hasPerms = true
+		if (restriction >= 2 && (message.author.id === '162369340069511180')) hasPerms = true
 		else if (restriction === 1 && message.member.hasPermission(['ADMINISTRATOR', 'MANAGE_GUILD'])) hasPerms = true
 		else if (restriction === 0) hasPerms = true
 		return hasPerms;

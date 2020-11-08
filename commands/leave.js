@@ -10,6 +10,7 @@ var commands = {
 	run: async function(client, message, args) {
 		if (message.member.voice.channel) {
             const connection = await message.member.voice.channel.leave();
+			message.channel.send("Now Leaving " + message.member.voice.channel.name)
 		}
 	},
 	//Command Section

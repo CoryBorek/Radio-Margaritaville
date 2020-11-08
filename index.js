@@ -20,7 +20,7 @@ require("http").createServer(async (req,res) => {res.statusCode = 200; res.write
 
 //Enable bot, send a few messages to console.
 client.on('ready', () => {
-	console.log("ParksBot is enabled.");
+	console.log(client.user.username + " is enabled.");
 	console.log(client.guilds.cache.size)
 	//dbl.postStats(client.guilds.size, client.shard.ids[0], client.shards.total).catch(console.errpr);
 	/*client.shard.fetchClientValues('client.guilds.cache.size').then(results => {

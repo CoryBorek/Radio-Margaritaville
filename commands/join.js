@@ -13,7 +13,7 @@ var commands = {
 			const dispatcher = connection.play('http://radmarg.ic.llnwd.net/stream/radmarg_razorback');
 			
 			dispatcher.on('start', () => {
-				message.channel.send("Now Playing Radio Margaritaville.")
+				message.channel.send("Joined "+ message.member.voice.channel.name +" and Playing Radio Margaritaville.")
 			});
 
 			dispatcher.on('finish', () => {
