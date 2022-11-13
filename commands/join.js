@@ -1,38 +1,49 @@
 //Requires
-const { MessageEmbed } = require("discord.js");
+const { MessageEmbed, InteractionCollector } = require("discord.js");
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
 const {red, orange, green, cyan} = require("../colors.json");
 const {readdirSync} = require('fs');
 
 //Command Handler
 var commands = {
 	//What to run
-	run: async function(client, message, args) {
-		if (message.member.voice.channel) {
-            const connection = await message.member.voice.channel.join();
+	run: async function(client, interaction) {
+		if (interaction.member.voice.channel && interaction.member.voice.channel.joinable) {
+            const connection = await joinVoiceChannel({
+				channelId: interaction.member.voice.channel.id,
+				guildId: interaction.member.voice.channel.guild.id,
+				adapterCreator: interaction.member.voice.channel.guild.voiceAdapterCreator
+			});
 			
-			const dispatcher = connection.play('http://radmarg.ic.llnwd.net/stream/radmarg_razorback');
+			const player = createAudioPlayer();
+			const resource = createAudioResource('http://radmarg.ic.llnwd.net/stream/radmarg_razorback', { inlineVolume: true});
 			
-			dispatcher.on('start', () => {
-				message.channel.send("Joined "+ message.member.voice.channel.name +" and Playing Radio Margaritaville.")
+			connection.subscribe(player);
+			player.play(resource);
+
+			player.on('error', error => {
+				console.error(error);
 			});
 
-			dispatcher.on('finish', () => {
-				message.channel.send("Radio Margaritaville has finished playing.")
+			player.on(AudioPlayerStatus.Idle, () => {
+				player.play(resource);
 			});
 
-			// Always remember to handle errors 
-			dispatcher.on('error', console.error);
+			interaction.reply({content: 'Joined Channel: ' + interaction.member.voice.channel.name});
+		}
+		else {
+			interaction.reply('Sorry! but you\'re not in a channel!')
 		}
 	},
 	//Command Section
 	section: "Radio Margaritaville",
 	//Description of command
-	description: "Replies Pong",
+	description: "Joins your channel and plays Radio Margaritaville",
 	//Restrictions
 	restriction: 0,
 	//usage
 	usage: "join",
-	//Aliases
-	aliases: []
+
+	options: []
 }
 module.exports = commands;

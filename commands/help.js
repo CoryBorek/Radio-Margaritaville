@@ -1,37 +1,36 @@
 //Requires
-const { MessageEmbed } = require("discord.js");
-const {red, orange, green, cyan} = require("../colors.json");
+const {cyan} = require("../colors.json");
 const {readdirSync} = require('fs');
 const {hasPerms} = require('../util.js');
-
+const {EmbedBuilder} = require('discord.js')
 //Command Syntax
 var commands = {
 	// Command Handling
-	run: function(client, message, args) {
+	run: function(client, interaction) {
 		//Embed to send
-		let prefix = require('../index.js').prefix
-		let embed = new MessageEmbed()
+
+		let embed = new EmbedBuilder()
 		.setColor(cyan)
-		.setTitle(`Hey, ` + message.author.username)
-		.setAuthor(`Commands`, client.user.displayAvatarURL)
-		.setImage(client.user.displayAvatarURL)
-		.setFooter(`Radio Margaritaville by agentdid127`);
+		.setTitle(`Hey, ` + interaction.user.username)
+		.setAuthor({name: `Commands`})
+		.setImage(client.user.avatarURL())
+
 		let sendM = false
 		var list = readdirSync("./commands/");
 		// List of commands
-		if (!(args.length > 1)) {
+		if (interaction.options.getString('command') === null) {
 			let cat=[];
 			let command2 = []
 			list.forEach(file => {
 				let command = require("./" + file);
 				let restriction = command.restriction;
-				if (hasPerms(restriction, message)) {
+				if (hasPerms(restriction, interaction)) {
 				if (cat.indexOf(command.section) === -1)
 				{
 					cat.push(command.section)
 					command2[cat.indexOf(command.section)] = []
 				}
-				command2[cat.indexOf(command.section)].push("`" + prefix + file.replace(".js", "") + "`")
+				command2[cat.indexOf(command.section)].push("`/" + command.usage + "`")
 			}
 
 			})
@@ -41,7 +40,7 @@ var commands = {
 					m = m + (item + ", ");
 				});
 
-				embed.addField(item, m.substring(0, m.length-2))
+				embed.addFields({ name: item, value: m.substring(0, m.length-2)});
 			});
 
 			sendM = true
@@ -54,17 +53,17 @@ var commands = {
 				let restriction = command.restriction;
 
 
-				if(hasPerms(restriction, message)) {
-				if (args[1].toLowerCase() === file.replace(".js", "")) {
+				if(hasPerms(restriction, interaction)) {
+				if (interaction.options.getString('command') === file.replace(".js", "")) {
 					let command = require("./" + file);
-					embed.setTitle(`Command: ` + prefix + file.replace(".js", "") )
+					embed.setTitle(`Command: /` + file.replace(".js", ""))
 					embed.setDescription(command.description)
 					let aliases = "";
-					command.aliases.forEach(alias => {
-						aliases += "`" + prefix + alias + "`, "
-					})
-					embed.addField("Usage", prefix + command.usage)
-					embed.addField("Aliases", aliases.substring(0, aliases.length-2))
+					// command.aliases.forEach(alias => {
+					// 	aliases += "`" + prefix + alias + "`, "
+					// })
+					embed.addFields({ name: "Usage", value: "/" + command.usage});
+					// embed.addFields({ name: "Aliases", value: aliases.substring(0, aliases.length-2)});
 					match = true;
 					sendM = true;
 				}
@@ -74,8 +73,8 @@ var commands = {
 
 		}
 		if (sendM)
-		message.channel.send(embed);
-		else message.channel.send("Invalid Syntax: Try `p!help [command]`")
+		interaction.reply({content: "", embeds: [embed]});
+		else interaction.reply({content: "Invalid Syntax: Try `p!help [command]`"});
 
 	},
 	// Sections for command (if we add it)
@@ -85,10 +84,35 @@ var commands = {
 	// Restriction
 	restriction: 0,
 	//Usage
-	usage: "help (command)",
-	//Aliases
-	aliases: ["halp", "beans"]
+	usage: "help",
+
+	options: [
+		{
+			type: 'string',
+			name: 'command',
+			description: 'A command',
+			required: false,
+			choices: getOptions()
+		}
+	]
 }
 
 //Exports Command.
 module.exports = commands;
+
+
+function getOptions() {
+	var commands = readdirSync("./commands/")
+
+	var out = [];
+	for (var i in commands) {
+		var object = {
+			name: commands[i].replaceAll(".js", ""),
+			value: commands[i].replaceAll(".js", "")
+		}
+		out.push(object);
+	}
+
+	return out;
+
+}
