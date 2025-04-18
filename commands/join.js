@@ -16,7 +16,7 @@ var commands = {
 			});
 			
 			const player = createAudioPlayer();
-			const resource = createAudioResource('http://radmarg.ic.llnwd.net/stream/radmarg_razorback', { inlineVolume: true});
+			const resource = createAudioResource(process.env.RADIOSTREAM, { inlineVolume: true});
 			
 			connection.subscribe(player);
 			player.play(resource);
